@@ -1,12 +1,15 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require("cors");
 const { MongoClient } = require('mongodb');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(cors());
+
 const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri);
 
 app.get('/channels', async (req, res) => {
   try {
