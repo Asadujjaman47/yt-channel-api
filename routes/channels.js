@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Channel = require('../models/channel');
-const client = require('../config/database');
 
 // Create a new channel
 router.post('/', async (req, res) => {
   try {
     const channel = new Channel(req.body);
-    await channel.save(client);
+    await channel.save();
     res.json(channel);
   } catch (error) {
     console.error(error);
@@ -17,9 +16,14 @@ router.post('/', async (req, res) => {
 
 // Get all channels
 router.get('/', async (req, res) => {
-  try {
-    const channels = await Channel.getAll(client);
-    res.json(channels);
+    try {
+    const channels = await Channel.find();
+    // console.log(channels.length);
+    if (channels.length > 0) {
+      res.send(channels);
+    } else {
+      res.send({ result: "No data found" });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error', message: error.message });
@@ -30,7 +34,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const channel = await Channel.findById(client, id);
+    const channel = await Channel.findById(id);
     if (!channel) {
       res.status(404).json({ error: 'Channel not found' });
     } else {
@@ -46,12 +50,12 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const channel = await Channel.findById(client, id);
+    const channel = await Channel.findById(id);
     if (!channel) {
       res.status(404).json({ error: 'Channel not found' });
     } else {
       Object.assign(channel, req.body);
-      await channel.save(client);
+      await channel.save();
       res.json(channel);
     }
   } catch (error) {
@@ -64,8 +68,12 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    await Channel.deleteById(client, id);
-    res.json({ message: 'Channel deleted successfully' });
+    const channel = await Channel.findByIdAndDelete(id);
+    if (!channel) {
+      res.status(404).json({ error: "Channel not found" });
+    } else {
+      res.json({ message: "Channel deleted successfully" });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error', message: error.message });

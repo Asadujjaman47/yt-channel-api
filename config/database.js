@@ -1,20 +1,25 @@
-const { MongoClient } = require('mongodb');
-const env = require('./env');
+// config/database.js
+const mongoose = require("mongoose");
+const env = require("./env");
 
-const uri = env.MONGO_URI;
-const client = new MongoClient(uri);
+mongoose
+  .connect(`${env.MONGO_URI}/${env.DB_NAME}`)
+  .then(() => {
+    console.log(`Connected to MongoDB database: ${env.DB_NAME}`);
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
 
-async function connectToMongoDB() {
-  try {
-    if (process.env.NODE_ENV === "development") {
-        await client.connect();
-        console.log('Connected to MongoDB');
-    }
-  } catch (err) {
-    console.error("Error connecting to MongoDB:", err);
-  }
-}
+// const db = mongoose.connection;
 
-connectToMongoDB();
+// db.on("error", (err) => {
+//   console.error("Error connecting to MongoDB:", err);
+//   process.exit(1);
+// });
 
-module.exports = client;
+// db.once("open", () => {
+//   console.log("Connected to MongoDB");
+// });
+
+module.exports = mongoose;
