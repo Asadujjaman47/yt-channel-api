@@ -1,4 +1,5 @@
 const { ObjectId } = require('mongodb');
+const env = require("../config/env");
 
 class Channel {
   constructor(data) {
@@ -11,25 +12,32 @@ class Channel {
   }
 
   static async getAll(client) {
-    const db = client.db('yt');
-    const channels = await db.collection('channel').find().toArray();
+    const db = client.db(env.DB_NAME);
+    const channels = await db
+      .collection(env.CHANNEL_COLLECTION)
+      .find()
+      .toArray();
     return channels.map((channel) => new Channel(channel));
   }
 
   static async findById(client, id) {
-    const db = client.db('yt');
-    const channel = await db.collection('channel').findOne({ _id: new ObjectId(String(id)) });
+    const db = client.db(env.DB_NAME);
+    const channel = await db
+      .collection(env.CHANNEL_COLLECTION)
+      .findOne({ _id: new ObjectId(String(id)) });
     return channel ? new Channel(channel) : null;
   }
 
   async save(client) {
-    const db = client.db('yt');
-    await db.collection('channel').insertOne(this);
+    const db = client.db(env.DB_NAME);
+    await db.collection(env.CHANNEL_COLLECTION).insertOne(this);
   }
 
   static async deleteById(client, id) {
-    const db = client.db('yt');
-    await db.collection("channel").deleteOne({ _id: new ObjectId(String(id)) });
+    const db = client.db(env.DB_NAME);
+    await db
+      .collection(env.CHANNEL_COLLECTION)
+      .deleteOne({ _id: new ObjectId(String(id)) });
   }
 }
 
