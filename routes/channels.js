@@ -1,32 +1,41 @@
 const express = require('express');
 const router = express.Router();
 const Channel = require('../models/channel');
+const response = require("../utils/response");
 
 // Create a new channel
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const channel = new Channel(req.body);
-    await channel.save();
-    res.json(channel);
+    const { name } = req.body;
+    if (!name) {
+      response(res, 400, null, "Channel name is required");
+    } else {
+      const existingChannel = await Channel.findOne({ name });
+      if (existingChannel) {
+        response(res, 400, null, "Channel with this name already exists");
+      } else {
+        const channel = new Channel(req.body);
+        await channel.save();
+        response(res, 201, channel, "Channel created successfully");
+      }
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    response(res, 500, null, "Failed to create channel", error);
   }
 });
 
 // Get all channels
 router.get('/', async (req, res) => {
-    try {
+  try {
     const channels = await Channel.find();
-    // console.log(channels.length);
     if (channels.length > 0) {
-      res.send(channels);
+      response(res, 200, channels);
     } else {
-      res.send({ result: "No data found" });
+      response(res, 200, null, "No channels found");
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    response(res, 500, null, "Failed to retrieve channels", error);
+    // response(res, 500, null, "Internal Server Error", error.message);
   }
 });
 
@@ -36,13 +45,12 @@ router.get('/:id', async (req, res) => {
     const id = req.params.id;
     const channel = await Channel.findById(id);
     if (!channel) {
-      res.status(404).json({ error: 'Channel not found' });
+      response(res, 404, null, 'Channel not found');
     } else {
-      res.json(channel);
+      response(res, 200, channel);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    response(res, 500, null, "Failed to retrieve channel", error);
   }
 });
 
@@ -52,15 +60,14 @@ router.put('/:id', async (req, res) => {
     const id = req.params.id;
     const channel = await Channel.findById(id);
     if (!channel) {
-      res.status(404).json({ error: 'Channel not found' });
+      response(res, 404, null, 'Channel not found');
     } else {
       Object.assign(channel, req.body);
       await channel.save();
-      res.json(channel);
+      response(res, 200, channel, 'Channel updated successfully');
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    response(res, 500, null, "Failed to update channel", error);
   }
 });
 
@@ -70,13 +77,12 @@ router.delete('/:id', async (req, res) => {
     const id = req.params.id;
     const channel = await Channel.findByIdAndDelete(id);
     if (!channel) {
-      res.status(404).json({ error: "Channel not found" });
+      response(res, 404, null, 'Channel not found');
     } else {
-      res.json({ message: "Channel deleted successfully" });
+      response(res, 200, null, 'Channel deleted successfully');
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    response(res, 500, null, "Failed to delete channel", error);
   }
 });
 

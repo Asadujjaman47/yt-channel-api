@@ -1,4 +1,4 @@
 module.exports = (error, req, res, next) => {
   console.error(error);
-  res.status(500).json({ error: 'Internal Server Error' });
+  response(res, 500, null, "Internal Server Error", error);
 };

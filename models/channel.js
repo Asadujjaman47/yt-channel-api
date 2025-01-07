@@ -3,7 +3,12 @@ const env = require("../config/env");
 
 const channelSchema = new mongoose.Schema(
   {
-    name: String,
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     link: String,
     tags: String,
   },
