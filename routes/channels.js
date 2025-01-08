@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
       }
     }
   } catch (error) {
-    response(res, 500, null, "Failed to create channel", error);
+    response(res, 500, null, "Failed to create channel", error.message);
   }
 });
 
@@ -28,14 +28,20 @@ router.post("/", async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const channels = await Channel.find();
-    if (channels.length > 0) {
-      response(res, 200, channels);
+    const count = channels.length;
+    if (count > 0) {
+      response(
+        res,
+        200,
+        channels,
+        `Channels retrieved successfully. Total channels: ${count}`
+      );
     } else {
       response(res, 200, null, "No channels found");
     }
   } catch (error) {
-    response(res, 500, null, "Failed to retrieve channels", error);
-    // response(res, 500, null, "Internal Server Error", error.message);
+    // response(res, 500, null, "Failed to retrieve channels", error);
+    response(res, 500, null, "Failed to retrieve channels", error.message);
   }
 });
 
@@ -50,7 +56,7 @@ router.get('/:id', async (req, res) => {
       response(res, 200, channel);
     }
   } catch (error) {
-    response(res, 500, null, "Failed to retrieve channel", error);
+    response(res, 500, null, "Failed to retrieve channel", error.message);
   }
 });
 
@@ -67,7 +73,7 @@ router.put('/:id', async (req, res) => {
       response(res, 200, channel, 'Channel updated successfully');
     }
   } catch (error) {
-    response(res, 500, null, "Failed to update channel", error);
+    response(res, 500, null, "Failed to update channel", error.message);
   }
 });
 
@@ -82,7 +88,7 @@ router.delete('/:id', async (req, res) => {
       response(res, 200, null, 'Channel deleted successfully');
     }
   } catch (error) {
-    response(res, 500, null, "Failed to delete channel", error);
+    response(res, 500, null, "Failed to delete channel", error.message);
   }
 });
 
